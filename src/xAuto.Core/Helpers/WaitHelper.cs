@@ -42,34 +42,6 @@ namespace xAuto.Core.Helpers
             return false;
         }
 
-        /// <summary>
-        /// Repeatedly execute the provided function until it returns true or timeout expires.
-        /// </summary>
-        /// <param name="action">The action to execute repeatedly.</param>
-        /// <param name="timeoutMs">Maximum time to wait in milliseconds.</param>
-        /// <param name="pollIntervalMs">Delay between attempts.</param>
-        /// <param name="timeoutMessage">Optional message to print when timeout occurs.</param>
-        /// <returns>True if action succeeded before timeout, false otherwise.</returns>
-        public static bool WaitUntilTimeout(
-            Func<bool> action)
-        {
-            var stopwatch = Stopwatch.StartNew();
-            while (stopwatch.Elapsed.TotalSeconds < Config.FindControlTimeout)
-            {
-                if (action())
-                {
-                    var remainingTime = Config.FindControlTimeout - stopwatch.Elapsed.TotalSeconds;
-                    if (remainingTime <= 0)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-                Sys.Sleep(Config.PollInterval);
-            }
-            return false;
-        }
-
         public static bool WaitWindowUntilTimeout(
          Func<bool> action)
         {
@@ -89,5 +61,35 @@ namespace xAuto.Core.Helpers
             }
             return false;
         }
+
+        /// <summary>
+        /// Repeatedly execute the provided function until it returns true or timeout expires.
+        /// </summary>
+        /// <param name="action">The action to execute repeatedly.</param>
+        /// <param name="timeoutMs">Maximum time to wait in milliseconds.</param>
+        /// <param name="pollIntervalMs">Delay between attempts.</param>
+        /// <param name="timeoutMessage">Optional message to print when timeout occurs.</param>
+        /// <returns>True if action succeeded before timeout, false otherwise.</returns>
+        
+        public static bool WaitElementUntilTimeout(
+            Func<bool> action)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            while (stopwatch.Elapsed.TotalSeconds < Config.FindControlTimeout)
+            {
+                if (action())
+                {
+                    var remainingTime = Config.FindControlTimeout - stopwatch.Elapsed.TotalSeconds;
+                    if (remainingTime <= 0)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                Sys.Sleep(Config.PollInterval);
+            }
+            return false;
+        }
+
     }
 }

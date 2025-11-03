@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,10 +37,11 @@ namespace xAuto
                 Console.WriteLine("\n");
                 //Logger.WriteLine("Automation ended. Press Enter to exit.");
             }
-            Console.ReadLine();
+           
         }
         static void Main(string[] args)
         {
+            //KeyboardBlocker.BlockPhysicalKeyboard();
             bool isInstallOpenVPN = OpenVPNInstall.Run();
             if (!isInstallOpenVPN)
             {
@@ -45,7 +49,6 @@ namespace xAuto
                 //Logger.WriteLine("Retrying OpenVPN installation...");
                 return;
             }
-
             bool isInstallTightVNC = TightVNCInstall.Run();
             if (!isInstallTightVNC)
             {
@@ -54,7 +57,8 @@ namespace xAuto
             }
 
             EndAutomation(true, string.Empty);
-
+            //KeyboardBlocker.UnblockPhysicalKeyboard();
+            Console.ReadLine();
             //string tightvncPath = @"D:\Projects\xAuto\setup\tightvnc-2.8.85-gpl-setup-64bit.msi";
             //string novaLCTPath = @"D:\Projects\xAuto\setup\NovaLCT V5.7.1.exe";
         }

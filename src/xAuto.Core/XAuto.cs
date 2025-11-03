@@ -73,7 +73,7 @@ namespace xAuto.Core
             return window;
         }
 
-        public static AutomationElement WaitUtilsExitsWindow(string namePartWindow)
+        public static AutomationElement WaitForWindow(string namePartWindow)
         {
             AutomationElement window = null;
             Logger.WriteLine($"{new string(' ', 5)}Wait {namePartWindow}");
@@ -100,7 +100,7 @@ namespace xAuto.Core
         {
             AutomationElement window = null;
             Logger.WriteLine($"{new string(' ', 5)}Click {elementNamePart}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     window = UIElementFinder.GetWindowByNameContains(namePartWindow);
@@ -132,16 +132,16 @@ namespace xAuto.Core
             return window;
         }
 
-        public static AutomationElement SetText<T>(string namePartWindow, string xpath,string value) where T : UIElementBase
+        public static AutomationElement SetText<T>(string namePartWindow, string xpath, string value) where T : UIElementBase
         {
             AutomationElement window = null;
             Logger.WriteLine($"{new string(' ', 5)}Click {xpath}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     window = UIElementFinder.GetWindowDeep(namePartWindow);
                     var control = UIElementFactory.FindControlByXpath<T>(window, xpath);
-                    var Element =  UIElementFinder.FindByXPath(window, xpath);
+                    var Element = UIElementFinder.FindByXPath(window, xpath);
                     if (control != null)
                     {
                         switch (control)
@@ -151,12 +151,11 @@ namespace xAuto.Core
                                 AutoItX.WinActivate("TightVNC Server: Set Passwords");
                                 Thread.Sleep(50);
                                 MouseHelper.LeftClick((int)Element.Current.BoundingRectangle.X + 10, (int)Element.Current.BoundingRectangle.Y + 5);
-                              
+
                                 Thread.Sleep(50);
                                 AutoItX.Send(value); // Select all existing text
                                 Thread.Sleep(2000);
                                 // textBox.SetText(value);
-
                                 break;
                         }
                         return true;
@@ -176,7 +175,7 @@ namespace xAuto.Core
         {
             AutomationElement window = null;
             Logger.WriteLine($"{new string(' ', 5)}Check {elementNamePart}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     window = UIElementFinder.GetWindowByNameContains(namePartWindow);
@@ -200,7 +199,7 @@ namespace xAuto.Core
        string elementNamePart, bool checkValue) where T : UIElementBase
         {
             Logger.WriteLine($"{new string(' ', 5)}Check {elementNamePart}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     var control = UIElementFactory.FindControl<T>(window, elementNamePart);
@@ -221,16 +220,28 @@ namespace xAuto.Core
         public static void Click<T>(AutomationElement window, string elementNamePart) where T : UIElementBase
         {
             Logger.WriteLine($"{new string(' ', 5)}Click {elementNamePart}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
-                    var control = UIElementFactory.FindControl<T>(window, elementNamePart);
-                    if (control != null)
+                    try
                     {
-                        control.Click();
-                        return true;
+                        var control = UIElementFactory.FindControl<T>(window, elementNamePart);
+                        if (control != null)
+                        {
+
+                            control.Click();
+
+                            return true;
+                        }
+                        else
+                        {
+                        }
+                        return false;
                     }
-                    return false;
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
                 }
             );
             if (!isClicked)
@@ -242,7 +253,7 @@ namespace xAuto.Core
         public static void ClickByXpath<T>(AutomationElement window, string xpath) where T : UIElementBase
         {
             Logger.WriteLine($"{new string(' ', 5)}Click {xpath}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     var control = UIElementFactory.FindControlByXpath<T>(window, xpath);
@@ -259,11 +270,11 @@ namespace xAuto.Core
                 throw new Exception($"Click '{xpath}' timeout!.");
             }
         }
-        
+
         public static void DeepClickUntilExists<T>(string windowPartName, string elementPartName) where T : UIElementBase
         {
             Logger.WriteLine($"{new string(' ', 5)}Click {elementPartName}");
-            bool isClicked = WaitHelper.WaitUntilTimeout(
+            bool isClicked = WaitHelper.WaitElementUntilTimeout(
                 () =>
                 {
                     var control = UIElementFactory.DeepFindControl<T>(windowPartName, elementPartName);

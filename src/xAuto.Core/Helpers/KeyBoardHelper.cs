@@ -11,7 +11,7 @@ namespace xAuto.Core.Helpers
 {
     public class KeyBoardHelper
     {
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool BlockInput(bool fBlockIt);
+        [DllImport("user32.dll")]
+        public static extern bool BlockInput(bool block);
     }
 }

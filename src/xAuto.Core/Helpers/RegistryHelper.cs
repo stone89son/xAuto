@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 namespace xAuto.Core.Helpers
 {
     public class RegistryHelper
-    {  /// <summary>
+    {  
+        
+        
+        /// <summary>
        /// Xóa một registry key bằng đường dẫn đầy đủ kiểu "HKEY_LOCAL_MACHINE\SOFTWARE\TightVNC".
        /// Trả về true nếu đã xóa ở ít nhất một view (64/32), false nếu không tìm thấy.
        /// Ném UnauthorizedAccessException nếu không có quyền ghi.

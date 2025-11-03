@@ -1,4 +1,5 @@
 ﻿using AutoIt;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -39,9 +40,9 @@ namespace xAuto
                 Sleep(2);
                 Logger.WriteLine("[OPEN] TightVNC Setup");
 
-                var window = XAuto.WaitUtilsExitsWindow("TightVNC Setup");
+                var window = XAuto.WaitForWindow("TightVNC Setup");
                 XAuto.Click<ButtonElement>(window, "Next");
-                window = XAuto.WaitUtilsExitsWindow("TightVNC Setup");
+                window = XAuto.WaitForWindow("TightVNC Setup");
                 LabelElement removeLabel = XAuto.FindControl<LabelElement>(window, "remove installation");
 
                 if (removeLabel != null)
@@ -55,7 +56,7 @@ namespace xAuto
                     Logger.WriteLine("[OPEN] TightVNC setup");
                     Process.Start(_tightvncPath);
                     Sleep(2);
-                    window = XAuto.WaitUtilsExitsWindow("TightVNC Setup");
+                    window = XAuto.WaitForWindow("TightVNC Setup");
                     XAuto.Click<ButtonElement>(window, "Next");
                 }
 
@@ -65,10 +66,8 @@ namespace xAuto
                 XAuto.Click<ButtonElement>("TightVNC Setup", "Custom");
 
                 XAuto.DeepClickUntilExists<TreeItemElement>("TightVNC Setup", "TightVNC Viewer");
-                KeyBoardHelper.BlockInput(true);
                 AutoItX.Send("{UP}");
                 AutoItX.Send("{ENTER}");
-                KeyBoardHelper.BlockInput(false);
                 XAuto.Click<ButtonElement>("TightVNC Setup", "Next");
                 XAuto.Click<ButtonElement>("TightVNC Setup", "Next");
                 XAuto.Click<ButtonElement>("TightVNC Setup", "Install");
@@ -79,7 +78,7 @@ namespace xAuto
                 //t(AutomationElement.RootElement, 0, "/");
                 //XAuto.WaitUntilExists<LabelElement>("TightVNC Setup", "Completing the TightVNC Setup Wizard", 300);
                 //TODO fix slow
-                var windowPass = XAuto.WaitUtilsExitsWindow("Set Passwords");
+                var windowPass = XAuto.WaitForWindow("Set Passwords");
 
                 if (windowPass == null)
                 {
@@ -91,8 +90,18 @@ namespace xAuto
                 IntPtr main2 = XAutoNative.FindWindow(null, "TightVNC Setup");
                 IntPtr edit1 = XAutoNative.FindWindowEx(main, IntPtr.Zero, "Edit", null);
                 XAutoNative.SetForegroundWindow(edit1);
+                // XAuto.SetText<TextBoxElement>("Set Passwords", "\\Pane[@AutomationId='1084']", "moyai25");
+
+                // KeyBoardHelper.BlockInput(false);
                 ProcessHelper.RunPassFill();
+                // KeyBoardHelper.BlockInput(true);
                 XAuto.Click<ButtonElement>("TightVNC Setup", "Finish");
+                bool isWritePass = WritePassword();
+                if (!isWritePass)
+                {
+                    Console.WriteLine("The password is incorrect.");
+                    return false;
+                }
                 //var (result, output, error) = ProcessHelper.RunCommand(@"PsExec64.exe -i -s "C:\Users\ThePC\Downloads\AutoHotkey_2.0.19\type.exe"");
                 //if (!result)
                 //{ 
@@ -100,10 +109,7 @@ namespace xAuto
                 //    Logger.WriteLine($"Run type.exe failed: {error}");
                 //}
 
-                //AutoItX.Send("moyai25");
-                //AutoItX.Send("{TAB}");
-                //AutoItX.Send("moyai25");
-                //AutoItX.Send("{ENTER}");
+
 
                 //XAuto.Click<RadioButtonElement>(windowPass, "Require password-based");
                 //XAuto.ClickByXpath<RadioButtonElement>(windowPass, "\\RadioButton[@Name='Require password-based authentication (make sure this box is always checked!)']");
@@ -212,6 +218,33 @@ namespace xAuto
             }
             Logger.WriteLine("[END] TightVNC is uninstall completed!");
             return true;
+        }
+
+        private static bool WritePassword()
+        {
+            var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using (var key = baseKey.OpenSubKey(@"SOFTWARE\TightVNC\Server", writable: true))
+            {
+                //Password is: moyai25
+                //In registry (type: REG_BINARY):
+                //Encrypt to bytes: "85 1E A4 D5 64 4F C7 B3"
+
+                byte[] pswMoyai = { 133, 30, 164, 213, 100, 79, 199, 179 };
+                key.SetValue("Password", pswMoyai, RegistryValueKind.Binary);
+
+                var passwordObj = key.GetValue("Password");
+                string passwordStr = BitConverter.ToString(passwordObj as byte[]).Replace("-", "");
+                //Console.WriteLine($"Password is:{passwordStr}");
+                byte[] passwordBytes = passwordObj as byte[];
+                if (pswMoyai.SequenceEqual(passwordBytes))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
     }
 }

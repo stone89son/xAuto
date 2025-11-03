@@ -90,6 +90,7 @@
     <Compile Include="Controls\TreeViewElement.cs" />
     <Compile Include="Enums\ActionType.cs" />
     <Compile Include="Helpers\DebugHelper.cs" />
+    <Compile Include="Helpers\KeyboardBlocker.cs" />
     <Compile Include="Helpers\KeyBoardHelper.cs" />
     <Compile Include="Helpers\MouseHelper.cs" />
     <Compile Include="Helpers\ProcessHelper.cs" />

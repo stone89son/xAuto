@@ -33,7 +33,7 @@ namespace xAuto
                 Process.Start(_openVPNPath);
                 Sleep(1);
 
-                var window = XAuto.WaitUtilsExitsWindow("Setup OpenVPN 2.6");
+                var window = XAuto.WaitForWindow("Setup OpenVPN 2.6");
                 if (window == null)
                 {
                     Logger.WriteLine("Cannot find OpenVPN setup window");
@@ -53,7 +53,7 @@ namespace xAuto
                     Logger.WriteLine("[OPEN] OpenVPN setup");
                     Process.Start(_openVPNPath);
                     Sleep(2);
-                    window = XAuto.WaitUtilsExitsWindow("Setup OpenVPN 2.6");
+                    window = XAuto.WaitForWindow("Setup OpenVPN 2.6");
                 }
                 else
                 {
