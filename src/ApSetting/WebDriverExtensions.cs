@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using ApSetting.Forms;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace ApSetting
 {
@@ -68,13 +70,14 @@ namespace ApSetting
             });
 
             //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", element);
-
+            NotificationManager.ShowMessage($"#{screenshotIndex} {actionDescription}");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} #{screenshotIndex} {actionDescription}");
             Capture(driver, screenshotIndex, actionDescription, "BEFORE");
             action(element);
             Capture(driver, screenshotIndex, actionDescription, "AFTER");
         }
 
-        private static void Capture(IWebDriver driver,int screenshotIndex, string actionDescription, string when)
+        private static void Capture(IWebDriver driver, int screenshotIndex, string actionDescription, string when)
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
             using (var ms = new System.IO.MemoryStream(ss.AsByteArray))
@@ -95,19 +98,19 @@ namespace ApSetting
                     g.DrawString(numberText, new Font("Arial", 32, FontStyle.Bold), Brushes.White, new PointF(10, 10));
 
                     // Ghi text trên thanh
-                    string time =  DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     string logText = $"[{when}] {actionDescription}";
                     g.DrawString($"{logText} | {time}", new Font("Arial", 16, FontStyle.Bold), Brushes.White, new PointF(120, 25));
                     // Vẽ ảnh gốc bên dưới thanh
                     g.DrawImage(original, 0, bannerHeight);
-                    Console.WriteLine($"{time} {numberText} {logText}");
+                   
                 }
 
                 _screenshots.Add(new Bitmap(bmpWithBanner));
                 original.Dispose();
             }
         }
-        public static void SaveAllScreenshots(this IWebDriver driver,string filePath)
+        public static void SaveAllScreenshots(this IWebDriver driver, string filePath)
         {
             if (_screenshots.Count == 0) return;
 

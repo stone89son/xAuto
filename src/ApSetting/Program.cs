@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using ApSetting.Forms;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
@@ -8,18 +9,26 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ApSetting
 {
     internal class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            NotificationManager.Start();
+
             var options = new EdgeOptions();
             options.AddArgument("start-maximized");
 
             IWebDriver driver = new EdgeDriver(options);
 
+            NotificationManager.ShowMessage("Open setting site");
+            
             driver.Navigate().GoToUrl("http://web.setting/");
 
             Thread.Sleep(6000);
@@ -42,6 +51,7 @@ namespace ApSetting
 
             driver.SaveAllScreenshots(Path.Combine(AppContext.BaseDirectory, "CameraAutomationLog.png"));
             driver.Quit();
+            NotificationManager.Close();
         }
     }
 }
