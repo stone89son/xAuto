@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using SeleniumExtras.WaitHelpers;
+using System.Runtime.CompilerServices;
 
 namespace ApSetting
 {
@@ -46,18 +48,29 @@ namespace ApSetting
             string actionDescription,
             By by,
             Action<IWebElement> action,
-            int timeoutInSeconds = 40)
+            bool isWaitVisible = true,
+            int timeoutInSeconds = 60 * 10)
         {
+            NotificationManager.ShowMessage($"#{screenshotIndex} {actionDescription}");
+            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} #{screenshotIndex} {actionDescription}");
+
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
             var element = wait.Until(drv =>
             {
                 try
                 {
                     var el = drv.FindElement(by);
-                    var elClickable = (el.Displayed && el.Enabled) ? el : null;
-                    if (elClickable != null)
+                    if (isWaitVisible)
                     {
-                        return elClickable;
+                        var elClickable = (el.Displayed && el.Enabled) ? el : null;
+                        if (elClickable != null)
+                        {
+                            return elClickable;
+                        }
+                    }
+                    else if (el != null)
+                    {
+                        return el;
                     }
                     // Element not yet present in DOM, return null to continue waiting
                     return null;
@@ -68,10 +81,11 @@ namespace ApSetting
                     return null;
                 }
             });
+            //var element = wait.Until(ExpectedConditions.ElementToBeClickable(by));
+
 
             //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", element);
-            NotificationManager.ShowMessage($"#{screenshotIndex} {actionDescription}");
-            Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} #{screenshotIndex} {actionDescription}");
+
             Capture(driver, screenshotIndex, actionDescription, "BEFORE");
             action(element);
             Capture(driver, screenshotIndex, actionDescription, "AFTER");
@@ -103,7 +117,7 @@ namespace ApSetting
                     g.DrawString($"{logText} | {time}", new Font("Arial", 16, FontStyle.Bold), Brushes.White, new PointF(120, 25));
                     // Vẽ ảnh gốc bên dưới thanh
                     g.DrawImage(original, 0, bannerHeight);
-                   
+
                 }
 
                 _screenshots.Add(new Bitmap(bmpWithBanner));
@@ -138,6 +152,17 @@ namespace ApSetting
             foreach (var img in _screenshots) img.Dispose();
             final.Dispose();
             _screenshots.Clear();
+        }
+
+        private static bool IsVisible(IWebDriver driver, IWebElement el)
+        {
+            return (bool)((IJavaScriptExecutor)driver).ExecuteScript(
+                "var elem = arguments[0];" +
+                "var box = elem.getBoundingClientRect();" +
+                "return (" +
+                "box.width > 0 && box.height > 0 && " +
+                "elem === document.elementFromPoint(box.left + box.width/2, box.top + box.height/2));",
+                el);
         }
     }
 }

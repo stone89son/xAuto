@@ -18,6 +18,11 @@ namespace ApSetting
         [STAThread]
         static void Main(string[] args)
         {
+            string configFilePath = Path.Combine(AppContext.BaseDirectory,
+                "Setup", 
+                "AccessPoint",
+                "settings.xml");
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             NotificationManager.Start();
@@ -45,12 +50,52 @@ namespace ApSetting
              By.Id("btLoginForm"),
              e => e.Click());
 
-            driver.DoAction(4,"Click about menu",
-                By.Id("mainNewMenuMobileAbout"),
+            driver.DoAction(4,"Click menu Setting",
+                By.Id("menu_FirstSE"),
                 e => e.Click());
 
+            Thread.Sleep(1000);
+
+            driver.DoAction(5, "Click menu Device Setting",
+            By.Id("menu_SE_device"),
+            e => e.Click());
+
+            Thread.Sleep(1000);
+
+            driver.DoAction(6, "Click menu Backup/Restore",
+                By.Id("mSidebarBackupRestoreTag"),
+                e => e.Click());
+
+            Thread.Sleep(6000);
+            driver.SwitchTo().Frame("content");
+
+            driver.DoAction(7, "Set file",
+              By.Id("restoreFile"),
+              e => e.SendKeys(configFilePath),
+              false);
+
+            driver.DoAction(8, "Click Restore",
+               By.Id("mBkupRestoreUPActBtn"),
+               e => e.Click());
+
+            Thread.Sleep(2000);
+
+            driver.SwitchTo().DefaultContent();
+            Thread.Sleep(2000);
+
+            driver.DoAction(9, "Set Password",
+              By.Id("backupRestorePassword"),
+              e => e.SendKeys("Nhungth8x@!"));
+
+            driver.DoAction(10, "Set Login",
+          By.Id("mPasswordOK"),
+          e => e.Click(),
+          false);
+
+           
+
             driver.SaveAllScreenshots(Path.Combine(AppContext.BaseDirectory, "CameraAutomationLog.png"));
-            driver.Quit();
+            //driver.Quit();
             NotificationManager.Close();
         }
     }
