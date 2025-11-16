@@ -54,19 +54,20 @@ namespace ApSetting
                 By.Id("menu_FirstSE"),
                 e => e.Click());
 
+            // Wait menu expand
             Thread.Sleep(1000);
 
             driver.DoAction(5, "Click menu Device Setting",
             By.Id("menu_SE_device"),
             e => e.Click());
 
+            // Wait menu expand
             Thread.Sleep(1000);
 
             driver.DoAction(6, "Click menu Backup/Restore",
                 By.Id("mSidebarBackupRestoreTag"),
                 e => e.Click());
 
-            Thread.Sleep(6000);
             driver.SwitchTo().Frame("content");
 
             driver.DoAction(7, "Set file",
@@ -78,8 +79,6 @@ namespace ApSetting
                By.Id("mBkupRestoreUPActBtn"),
                e => e.Click());
 
-            Thread.Sleep(2000);
-
             driver.SwitchTo().DefaultContent();
             Thread.Sleep(2000);
 
@@ -87,12 +86,9 @@ namespace ApSetting
               By.Id("backupRestorePassword"),
               e => e.SendKeys("Nhungth8x@!"));
 
-            driver.DoAction(10, "Set Login",
-          By.Id("mPasswordOK"),
-          e => e.Click(),
-          false);
-
-           
+            //driver.DoAction(10, "Set Login",
+            //    By.Id("mPasswordOK"),
+            //    e => e.Click());
 
             driver.SaveAllScreenshots(Path.Combine(AppContext.BaseDirectory, "CameraAutomationLog.png"));
             //driver.Quit();
