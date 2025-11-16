@@ -28,7 +28,10 @@ namespace ApSetting
                         // Ensure thread message loop exits when form closed
                         Application.ExitThread();
                     };
-                    _initEvent.Set();
+                    _form.Shown += (s, e) =>
+                    {
+                        _initEvent.Set();
+                    };
                     Application.Run(_form);
                 });
                 _uiThread.IsBackground = true;

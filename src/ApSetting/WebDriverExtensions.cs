@@ -91,6 +91,65 @@ namespace ApSetting
             Capture(driver, screenshotIndex, actionDescription, "AFTER");
         }
 
+        public static void DoConfirm(this IWebDriver driver,
+            int screenshotIndex,
+            string description,
+            By by,
+            string expectedValue,
+            bool isWaitVisible = true,
+            int timeoutInSeconds = 60)
+        {
+            NotificationManager.ShowMessage($"#{screenshotIndex} {description}");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} #{screenshotIndex} {description}");
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
+
+            // Đợi element xuất hiện
+            var element = wait.Until(drv =>
+            {
+                try
+                {
+                    var el = drv.FindElement(by);
+
+                    if (isWaitVisible)
+                    {
+                        return (el.Displayed && el.Enabled) ? el : null;
+                    }
+                    else
+                    {
+                        return el;
+                    }
+                }
+                catch
+                {
+                    return null;
+                }
+            });
+
+            // Screenshot BEFORE
+            Capture(driver, screenshotIndex, description, "CONFIRM-BEFORE");
+
+            // Lấy giá trị thực tế
+            string actualValue = GetElementValue(element);
+
+            // Screenshot AFTER
+            Capture(driver, screenshotIndex, description, "CONFIRM-AFTER");
+
+            // So sánh
+            bool isMatch = string.Equals(actualValue?.Trim(), expectedValue?.Trim(), StringComparison.OrdinalIgnoreCase);
+
+            Console.WriteLine($"[CONFIRM] Expected = '{expectedValue}', Actual = '{actualValue}', Result = {isMatch}");
+
+            if (!isMatch)
+            {
+                throw new Exception(
+                    $"[DoConfirm FAILED] #{screenshotIndex} {description}\n" +
+                    $"Expected: '{expectedValue}'\n" +
+                    $"Actual:   '{actualValue}'");
+            }
+        }
+
+
         private static void Capture(IWebDriver driver, int screenshotIndex, string actionDescription, string when)
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
@@ -153,6 +212,32 @@ namespace ApSetting
             final.Dispose();
             _screenshots.Clear();
         }
+
+        public static string GetElementValue(IWebElement element)
+        {
+            if (element == null)
+                return null;
+
+            string tag = element.TagName.ToLower();
+
+            if (tag == "input" || tag == "textarea")
+            {
+                string v2 = element.GetAttribute("value");
+                if (!string.IsNullOrEmpty(v2)) return v2;
+            }
+
+            string text = element.Text;
+            if (!string.IsNullOrEmpty(text)) return text;
+
+            string inner = element.GetAttribute("innerText");
+            if (!string.IsNullOrEmpty(inner)) return inner;
+
+            string tc = element.GetAttribute("textContent");
+            if (!string.IsNullOrEmpty(tc)) return tc;
+
+            return "";
+        }
+
 
         private static bool IsVisible(IWebDriver driver, IWebElement el)
         {

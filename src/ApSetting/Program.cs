@@ -18,21 +18,25 @@ namespace ApSetting
         [STAThread]
         static void Main(string[] args)
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            NotificationManager.Start();
+            
+
+            NotificationManager.ShowMessage("Open setting site");
+            Application.DoEvents();
+
             string configFilePath = Path.Combine(AppContext.BaseDirectory,
                 "Setup", 
                 "AccessPoint",
                 "settings.xml");
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            NotificationManager.Start();
-
+         
             var options = new EdgeOptions();
             options.AddArgument("start-maximized");
 
             IWebDriver driver = new EdgeDriver(options);
-
-            NotificationManager.ShowMessage("Open setting site");
             
             driver.Navigate().GoToUrl("http://web.setting/");
 
@@ -91,7 +95,7 @@ namespace ApSetting
             //    e => e.Click());
 
             driver.SaveAllScreenshots(Path.Combine(AppContext.BaseDirectory, "CameraAutomationLog.png"));
-            //driver.Quit();
+            driver.Quit();
             NotificationManager.Close();
         }
     }
