@@ -16,87 +16,71 @@ namespace ApSetting
     internal class Program
     {
         [STAThread]
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
 
-            NotificationManager.Start();
-            
+                //NotificationManager.Start();
 
-            NotificationManager.ShowMessage("Open setting site");
-            Application.DoEvents();
+                WifiHelper.DeleteAllProfiles();
+                List<(bool, bool)> isSuccessTests = new List<(bool, bool)>();
+                int maxAttempts1 = 0, maxAttempts2 = 0;
+                for (int i = 0; i < 100; i++)
+                {
+                    bool isConnected = await RetryHelperAsync.DoAsync((attempt) =>
+                    {
+                        if (attempt != 1)
+                        {
+                            Console.WriteLine($"Connect retry {attempt-1}");
+                            if (attempt > maxAttempts1)
+                            {
+                                maxAttempts1 = attempt;
+                            }
+                        }
+                        bool isConnectedWifi = WifiHelper.Connect("F82F65502F66-2G", "tm22t60jh01126");
+                        return Task.FromResult(isConnectedWifi);
+                    }, 10);
 
-            string configFilePath = Path.Combine(AppContext.BaseDirectory,
-                "Setup", 
-                "AccessPoint",
-                "settings.xml");
 
-         
-            var options = new EdgeOptions();
-            options.AddArgument("start-maximized");
+                    bool isPingedOk = await RetryHelperAsync.DoAsync(attempt =>
+                    {
+                        if (attempt != 1)
+                        {
+                            Console.WriteLine($"Ping retry {attempt-1}");
+                            if (attempt > maxAttempts2)
+                            {
+                                maxAttempts2 = attempt;
+                            }
+                        }
+                        bool isPingOk = WifiHelper.Ping("192.168.128.1");
+                        return Task.FromResult(isPingOk);
 
-            IWebDriver driver = new EdgeDriver(options);
-            
-            driver.Navigate().GoToUrl("http://web.setting/");
+                    }, 200);
 
-            Thread.Sleep(6000);
+                    isSuccessTests.Add((isConnected, isPingedOk));
+                    Console.WriteLine($"{(i + 1)} Connected to WiFi: {isConnected} , Ping: {isPingedOk}");
+                }
+                Console.WriteLine($@"Total Connected Count: {isSuccessTests.Count}, 
+True:{isSuccessTests.Count(e => e.Item1 == true)},
+False:{isSuccessTests.Count(e => e.Item1 == false)}
+Max Attemps:{maxAttempts1}");
 
-            driver.DoAction(1,"Click to Button Login",
-                By.Id("div_MainLogin"),
-                e => e.Click());
-
-            driver.DoAction(2,"Input password",
-                By.Id("IndexLoginPwd_Show"),
-                e => e.SendKeys("Nhungth8x@!"));
-
-            driver.DoAction(3,"Summit Login",
-             By.Id("btLoginForm"),
-             e => e.Click());
-
-            driver.DoAction(4,"Click menu Setting",
-                By.Id("menu_FirstSE"),
-                e => e.Click());
-
-            // Wait menu expand
-            Thread.Sleep(1000);
-
-            driver.DoAction(5, "Click menu Device Setting",
-            By.Id("menu_SE_device"),
-            e => e.Click());
-
-            // Wait menu expand
-            Thread.Sleep(1000);
-
-            driver.DoAction(6, "Click menu Backup/Restore",
-                By.Id("mSidebarBackupRestoreTag"),
-                e => e.Click());
-
-            driver.SwitchTo().Frame("content");
-
-            driver.DoAction(7, "Set file",
-              By.Id("restoreFile"),
-              e => e.SendKeys(configFilePath),
-              false);
-
-            driver.DoAction(8, "Click Restore",
-               By.Id("mBkupRestoreUPActBtn"),
-               e => e.Click());
-
-            driver.SwitchTo().DefaultContent();
-            Thread.Sleep(2000);
-
-            driver.DoAction(9, "Set Password",
-              By.Id("backupRestorePassword"),
-              e => e.SendKeys("Nhungth8x@!"));
-
-            //driver.DoAction(10, "Set Login",
-            //    By.Id("mPasswordOK"),
-            //    e => e.Click());
-
-            driver.SaveAllScreenshots(Path.Combine(AppContext.BaseDirectory, "CameraAutomationLog.png"));
-            driver.Quit();
-            NotificationManager.Close();
+                Console.WriteLine($@"Total Ping Count: {isSuccessTests.Count}, 
+True:{isSuccessTests.Count(e => e.Item2 == true)},
+False:{isSuccessTests.Count(e => e.Item2 == false)}
+Max Attemps:{maxAttempts2}");
+                //NotificationManager.Close();
+                Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Console.ReadLine();
+            }
         }
     }
 }
